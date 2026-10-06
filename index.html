@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -14,7 +13,6 @@ html
 
         body {
             background-color: #f7f3e8;
-            /* 點狀背景紋理效果 */
             background-image: radial-gradient(#d1c7b7 1px, transparent 1px);
             background-size: 16px 16px;
             font-family: "Noto Serif TC", "PMingLiU", "MingLiU", serif;
@@ -66,7 +64,6 @@ html
             letter-spacing: 2px;
         }
 
-        /* 雙層卡片邊框效果 */
         .card-outer {
             background-color: #fdfbf7;
             border: 2px solid #3d2b1f;
@@ -128,7 +125,6 @@ html
             background-color: #a00000;
         }
 
-        /* 答案選項按鈕樣式 */
         .options-container {
             width: 100%;
             display: flex;
@@ -152,18 +148,12 @@ html
             color: #2b1810;
         }
 
-        /* 隱藏未使用的區塊 */
-        .hidden {
-            display: none !important;
-        }
-
         .footer {
             font-size: 12px;
             color: #776655;
             letter-spacing: 1px;
         }
 
-        /* 結果頁面加強樣式 */
         .result-title {
             font-size: 22px;
             font-weight: bold;
@@ -181,20 +171,20 @@ html
         <p class="subtitle">測出你的頭皮靈魂與生活特質</p>
     </div>
 
-    <!-- 1. 開始畫面 -->
-    <div id="start-view" class="card-outer">
+    <!-- 1. 開始畫面 (預設顯示) -->
+    <div id="start-view" class="card-outer" style="display: block;">
         <div class="card-inner">
             <div class="icon-wrapper">🧼</div>
             <div class="description">
                 <p>一份來自 1964 年的復古問券。</p>
-                <p>只需 5 道生活情境題，帶你探索內心的生活節奏，找到專屬於你的清爽靈魂解答！</p>
+                <p>只需 5 道生活情境題，帶你探索內心的生活節奏，找到專專屬於你的清爽靈魂解答！</p>
             </div>
             <button class="btn-start" onclick="startQuiz()">開始人格測驗</button>
         </div>
     </div>
 
-    <!-- 2. 測驗題目畫面 -->
-    <div id="quiz-view" class="card-outer hidden">
+    <!-- 2. 測驗題目畫面 (預設強制隱藏) -->
+    <div id="quiz-view" class="card-outer" style="display: none;">
         <div class="card-inner">
             <div id="progress-badge" class="badge" style="background-color:#5a4033;">第 1 題 / 共 5 題</div>
             <div class="icon-wrapper" id="quiz-icon">✨</div>
@@ -207,8 +197,8 @@ html
         </div>
     </div>
 
-    <!-- 3. 測驗結果畫面 -->
-    <div id="result-view" class="card-outer hidden">
+    <!-- 3. 測驗結果畫面 (預設強制隱藏) -->
+    <div id="result-view" class="card-outer" style="display: none;">
         <div class="card-inner">
             <div class="badge">測驗結果</div>
             <div class="icon-wrapper" id="result-icon">👑</div>
@@ -223,7 +213,6 @@ html
     </div>
 
     <script>
-        // 5道題目資料與對應的屬性得分 (A, B, C, D)
         const questions = [
             {
                 icon: "⏰",
@@ -277,7 +266,6 @@ html
             }
         ];
 
-        // 四種人格結果定義
         const resultsData = {
             A: {
                 name: "經典草本型 —— 嚴謹踏實的職人靈魂",
@@ -304,67 +292,24 @@ html
         let currentQuestionIndex = 0;
         let scores = { A: 0, B: 0, C: 0, D: 0 };
 
-        // 開始測驗
         function startQuiz() {
-            document.getElementById('start-view').classList.add('hidden');
-            document.getElementById('quiz-view').classList.remove('hidden');
+            document.getElementById('start-view').style.display = 'none';
+            document.getElementById('quiz-view').style.display = 'block';
             currentQuestionIndex = 0;
             scores = { A: 0, B: 0, C: 0, D: 0 };
             showQuestion();
         }
 
-        // 渲染題目
         function showQuestion() {
             const currentQuestion = questions[currentQuestionIndex];
             
-            // 更新進度與圖示、題目文字
             document.getElementById('progress-badge').innerText = `第 ${currentQuestionIndex + 1} 題 / 共 ${questions.length} 題`;
             document.getElementById('quiz-icon').innerText = currentQuestion.icon;
             document.getElementById('question-text').innerText = currentQuestion.question;
             
-            // 產生選項按鈕
             const optionsBox = document.getElementById('options-box');
-請謹慎使用程式碼。
-optionsBox.innerHTML = ''; // 清空舊選項
-currentQuestion.options.forEach(option => {
-const button = document.createElement('button');
-button.className = 'btn-option';
-button.innerText = option.text;
-button.onclick = () => selectOption(option.type);
-optionsBox.appendChild(button);
-});
-}
-// 選擇答案
-function selectOption(type) {
-scores[type]++; // 該分數加一分
-currentQuestionIndex++;
-if (currentQuestionIndex < questions.length) {
-showQuestion(); // 繼續下一題
-} else {
-showResult(); // 題目結束，顯示結果
-}
-}
-// 結算並顯示結果
-function showResult() {
-document.getElementById('quiz-view').classList.add('hidden');
-document.getElementById('result-view').classList.remove('hidden');
-// 找出最高分的最高屬性
-let highestType = 'A';
-let maxScore = -1;
-for (let type in scores) {
-if (scores[type] > maxScore) {
-maxScore = scores[type];
-highestType = type;
-}
-}
-// 將結果填入畫面
-const result = resultsData[highestType];
-document.getElementById('result-icon').innerText = result.icon;
-document.getElementById('result-name').innerText = result.name;
-document.getElementById('result-desc').innerHTML = <p>${result.desc}</p>;
-}
-// 重新測驗
-function restartQuiz() {
-document.getElementById('result-view').classList.add('hidden');
-document.getElementById('start-view').classList.remove('hidden');
-}
+            optionsBox.innerHTML = '';
+            
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'btn-option';
