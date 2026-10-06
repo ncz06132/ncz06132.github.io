@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -105,9 +106,10 @@
             line-height: 1.8;
             color: #4a3b32;
             margin-bottom: 25px;
+            width: 100%;
         }
 
-        .btn-start {
+        .btn-start, .btn-option, .btn-restart {
             width: 100%;
             background-color: #8b0000;
             color: #ffffff;
@@ -119,17 +121,54 @@
             border-radius: 6px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        .btn-start:hover {
+        .btn-start:hover, .btn-option:hover, .btn-restart:hover {
             background-color: #a00000;
+        }
+
+        /* 答案選項按鈕樣式 */
+        .options-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: #f3e9dc;
+            color: #4a3b32;
+            border: 1px solid #c8b9a6;
+            box-shadow: none;
+            font-weight: normal;
+            text-align: left;
+            padding: 12px 15px;
+            letter-spacing: 1px;
+        }
+
+        .btn-option:hover {
+            background-color: #e6d5c1;
+            color: #2b1810;
+        }
+
+        /* 隱藏未使用的區塊 */
+        .hidden {
+            display: none !important;
         }
 
         .footer {
             font-size: 12px;
             color: #776655;
             letter-spacing: 1px;
+        }
+
+        /* 結果頁面加強樣式 */
+        .result-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #8b0000;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -142,18 +181,40 @@
         <p class="subtitle">測出你的頭皮靈魂與生活特質</p>
     </div>
 
-    <div class="card-outer">
+    <!-- 1. 開始畫面 -->
+    <div id="start-view" class="card-outer">
         <div class="card-inner">
-            <div class="icon-wrapper">
-                🧼
-            </div>
-            
+            <div class="icon-wrapper">🧼</div>
             <div class="description">
                 <p>一份來自 1964 年的復古問券。</p>
                 <p>只需 5 道生活情境題，帶你探索內心的生活節奏，找到專屬於你的清爽靈魂解答！</p>
             </div>
+            <button class="btn-start" onclick="startQuiz()">開始人格測驗</button>
+        </div>
+    </div>
 
-            <button class="btn-start" onclick="alert('測驗開始！')">開始人格測驗</button>
+    <!-- 2. 測驗題目畫面 -->
+    <div id="quiz-view" class="card-outer hidden">
+        <div class="card-inner">
+            <div id="progress-badge" class="badge" style="background-color:#5a4033;">第 1 題 / 共 5 題</div>
+            <div class="icon-wrapper" id="quiz-icon">✨</div>
+            <div class="description">
+                <p id="question-text" style="font-weight: bold; font-size: 17px;"></p>
+            </div>
+            <div class="options-container" id="options-box">
+                <!-- 選項會由 JS 自動產生 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 測驗結果畫面 -->
+    <div id="result-view" class="card-outer hidden">
+        <div class="card-inner">
+            <div class="badge">測驗結果</div>
+            <div class="icon-wrapper" id="result-icon">👑</div>
+            <div class="result-title" id="result-name"></div>
+            <div class="description" id="result-desc"></div>
+            <button class="btn-restart" onclick="restartQuiz()">重新測驗</button>
         </div>
     </div>
 
@@ -161,5 +222,149 @@
         © 1964-2026 耐斯經典洗髮粉 懷舊紀念版
     </div>
 
-</body>
-</html>
+    <script>
+        // 5道題目資料與對應的屬性得分 (A, B, C, D)
+        const questions = [
+            {
+                icon: "⏰",
+                question: "早晨醒來，你通常希望自己的一天如何開始？",
+                options: [
+                    { text: "精準規律，照著既定的行程表出發", type: "A" },
+                    { text: "隨心所欲，看今天心情決定做什麼", type: "B" },
+                    { text: "充滿活力，立刻去沖個熱水澡振奮精神", type: "C" },
+                    { text: "悠閒慢活，享受一杯咖啡的沉靜時光", type: "D" }
+                ]
+            },
+            {
+                icon: "🎒",
+                question: "當面對一件突然交辦的繁重任務時，你的反應是？",
+                options: [
+                    { text: "冷靜分析，把步驟拆解成細項按部就班完成", type: "A" },
+                    { text: "直覺思考，先做再說，兵來將擋水來土掩", type: "B" },
+                    { text: "講求效率，用最快最爽快的方式迅速搞定", type: "C" },
+                    { text: "不慌不忙，照著自己的靈魂節奏慢慢處理", type: "D" }
+                ]
+            },
+            {
+                icon: "🌿",
+                question: "你理想中的週末放鬆方式是哪一種？",
+                options: [
+                    { text: "把家裡打掃得一塵不染，物品歸位", type: "A" },
+                    { text: "隨性出門流浪，不設限目的地", type: "B" },
+                    { text: "去運動、流汗，享受徹底洗滌的暢快感", type: "C" },
+                    { text: "待在舒適的角落讀書、聽音樂發呆", type: "D" }
+                ]
+            },
+            {
+                icon: "📺",
+                question: "看到帶有懷舊復古感的老物件時，你心裡想的是？",
+                options: [
+                    { text: "讚嘆過去職人精神的嚴謹與踏實", type: "A" },
+                    { text: "覺得風格獨特，可以拿來玩穿搭或文創", type: "B" },
+                    { text: "單純、乾淨、沒有現代污染的純粹感", type: "C" },
+                    { text: "懷念那段步調緩慢、充滿人情味的時光", type: "D" }
+                ]
+            },
+            {
+                icon: "🛁",
+                question: "結束疲憊的一天，洗澡對你而言的意義是？",
+                options: [
+                    { text: "完成一天結束的必要儀式與常規", type: "A" },
+                    { text: "洗掉煩惱，洗澡時常常靈感湧現", type: "B" },
+                    { text: "徹底洗淨油膩、流汗後的無比清爽", type: "C" },
+                    { text: "沉浸在熱水與香氣中的療癒心靈時光", type: "D" }
+                ]
+            }
+        ];
+
+        // 四種人格結果定義
+        const resultsData = {
+            A: {
+                name: "經典草本型 —— 嚴謹踏實的職人靈魂",
+                icon: "📐",
+                desc: "你做事條理分明、講求原則，就像1964年傳承至今的經典配方那樣踏實。你喜歡乾淨俐落的生活節奏，無法忍受一絲油膩與混亂。在朋友眼中，你是最值得信賴的堅實後盾！"
+            },
+            B: {
+                name: "輕盈蓬鬆型 —— 天馬行空的自由浪子",
+                icon: "🎈",
+                desc: "你不喜歡受傳統拘束，靈魂裡充滿了跳躍的泡泡與創意。就像洗完頭髮後的輕盈蓬鬆感，你追求自由自在、沒有負擔的生活。隨性、樂觀是你迷人的招牌特質！"
+            },
+            C: {
+                name: "深層潔淨型 —— 爽快俐落的行動派",
+                icon: "⚡",
+                desc: "你熱愛效率、討厭拖泥帶水！面對問題，你總是像強力水流一樣直衝核心，追求徹底解決的暢快感。你的生活核心就是「清爽」，不留負擔，是有極強執行力的陽光特質。"
+            },
+            D: {
+                name: "古法溫潤型 —— 歲月靜好的療癒文青",
+                icon: "☕",
+                desc: "你的內心有一座復古的照相館，步調慢活而充滿詩意。你善於發現生活中的細微美好，比起追求速度，你更在乎心靈的溫潤與人情味。就像細緻的泡泡，溫柔地包裹著周遭的人。"
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { A: 0, B: 0, C: 0, D: 0 };
+
+        // 開始測驗
+        function startQuiz() {
+            document.getElementById('start-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            scores = { A: 0, B: 0, C: 0, D: 0 };
+            showQuestion();
+        }
+
+        // 渲染題目
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // 更新進度與圖示、題目文字
+            document.getElementById('progress-badge').innerText = `第 ${currentQuestionIndex + 1} 題 / 共 ${questions.length} 題`;
+            document.getElementById('quiz-icon').innerText = currentQuestion.icon;
+            document.getElementById('question-text').innerText = currentQuestion.question;
+            
+            // 產生選項按鈕
+            const optionsBox = document.getElementById('options-box');
+請謹慎使用程式碼。
+optionsBox.innerHTML = ''; // 清空舊選項
+currentQuestion.options.forEach(option => {
+const button = document.createElement('button');
+button.className = 'btn-option';
+button.innerText = option.text;
+button.onclick = () => selectOption(option.type);
+optionsBox.appendChild(button);
+});
+}
+// 選擇答案
+function selectOption(type) {
+scores[type]++; // 該分數加一分
+currentQuestionIndex++;
+if (currentQuestionIndex < questions.length) {
+showQuestion(); // 繼續下一題
+} else {
+showResult(); // 題目結束，顯示結果
+}
+}
+// 結算並顯示結果
+function showResult() {
+document.getElementById('quiz-view').classList.add('hidden');
+document.getElementById('result-view').classList.remove('hidden');
+// 找出最高分的最高屬性
+let highestType = 'A';
+let maxScore = -1;
+for (let type in scores) {
+if (scores[type] > maxScore) {
+maxScore = scores[type];
+highestType = type;
+}
+}
+// 將結果填入畫面
+const result = resultsData[highestType];
+document.getElementById('result-icon').innerText = result.icon;
+document.getElementById('result-name').innerText = result.name;
+document.getElementById('result-desc').innerHTML = <p>${result.desc}</p>;
+}
+// 重新測驗
+function restartQuiz() {
+document.getElementById('result-view').classList.add('hidden');
+document.getElementById('start-view').classList.remove('hidden');
+}
